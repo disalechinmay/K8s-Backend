@@ -1,0 +1,6 @@
+Every route will return a JSON response.
+
+Every route (including invalid routes) will have following two mandatory fields:
+	- status: ["SUCCESS" | "FAILURE"]
+	- statusDetails: "A message giving more details of the same..."
+	- payLoad: (Only if status is "SUCCESS")
