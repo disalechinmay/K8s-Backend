@@ -2,7 +2,11 @@
 
 from flask import Flask, jsonify
 
+from flask_cors import CORS
+
 app = Flask(__name__)
+CORS(app)
+
 from src.routes.pods import pods
 
 @app.route('/test')
@@ -22,4 +26,4 @@ def pageNotFound(e):
 		)
 
 if __name__ == '__main__':
-    app.run(port=5000, host="0.0.0.0", debug=True)
+    app.run(port=5000, debug=True)
