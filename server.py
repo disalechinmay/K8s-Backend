@@ -15,7 +15,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-from src.routes.pods import pods
+from src.routes.pods import *
 from src.routes.nodes import *
 from src.routes.namespaces import *
 
