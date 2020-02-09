@@ -20,6 +20,7 @@ def getDeployments():
 		tempDict["deploymentName"] = deployment["metadata"]["name"]
 		tempDict["deploymentLabels"] = deployment["metadata"]["labels"]
 		tempDict["deploymentAnnotations"] = deployment["metadata"]["annotations"]
+		tempDict["deploymentReplicas"] = deployment["spec"]["replicas"]
 		tempDict["deploymentSelectors"] = {}
 
 		# Clubbing all kinds of selectors into deploymentSelectors
@@ -46,7 +47,7 @@ def getDeployments():
 
 	return jsonify(
 		status = "SUCCESS",
-		statusDetails = "Returning data from /pods/ endpoint.",
+		statusDetails = "Returning data from /deployments/ endpoint.",
 		payLoad = returnList,
 		raw = allDeployments
 		)
