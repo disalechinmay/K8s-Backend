@@ -6,7 +6,10 @@ import json
 @app.route('/pods/', methods=['GET'])
 def getPods():
 
+	# Get query param "namespace", if not present set to "default"
 	namespace = request.args.get("namespace")
+	if namespace is None:
+		namespace = "default"
 
 	allPods = v1.list_namespaced_pod(namespace).to_dict()
 

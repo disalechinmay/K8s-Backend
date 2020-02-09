@@ -9,12 +9,16 @@ from flask_cors import CORS
 config.load_kube_config()
 
 v1 = client.CoreV1Api()
+appsv1 = client.AppsV1Api()
 
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
+
+from src.routes.services import *
+from src.routes.deployments import *
 from src.routes.pods import *
 from src.routes.nodes import *
 from src.routes.namespaces import *
