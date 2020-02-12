@@ -28,8 +28,18 @@ def getPods():
 		returnList.append(tempDict)
 
 
+
+
+
 	return jsonify(
 		status = "SUCCESS",
 		statusDetails = "Returning data from /pods/ endpoint.",
 		payLoad = returnList
 		)
+
+
+
+@app.route('/deletePod', methods=['POST'])
+def deletePod():
+	print(request.get_json())
+	print(request.data)

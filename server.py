@@ -1,6 +1,6 @@
 # Read APIRef.txt before working on this repo.
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, make_response
 from kubernetes import client, config
 from flask_cors import CORS
 
@@ -16,8 +16,18 @@ batchv1 = client.BatchV1Api()
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
 
+@
+
+# @app.after_request
+# def after_request(response):
+# 	print("INSIDE")
+# 	print(response.headers)
+# 	response.headers.add('Access-Control-Allow-Origin', '*')
+# 	response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+# 	response.headers.add('Access-Control-Allow-Methods', 'GET,POST')
+# 	print(response.headers)
+# 	return response
 
 from src.routes.services import *
 from src.routes.deployments import *

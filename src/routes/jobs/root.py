@@ -16,6 +16,19 @@ def getjobs():
     for jobs in alljobs["items"]:
         tempDict = {}
         tempDict["jobName"]=jobs["metadata"]["name"]
+        tempDict["jobLabels"] = jobs["metadata"]["labels"]
+        tempDict["jobAnnotations"] = jobs["metadata"]["annotations"]
+        tempDict["jobStatus"]=[]
+        tempDict["jobTemplate"]=[]
+
+        print()
+        print("\nSPEC->template->spec")
+        for container in jobs["spec"]["template"]["spec"]["containers"]:
+            tempDict["jobTemplate"].append(container["image"])
+        
+            
+        for status in jobs["status"]["conditions"]:
+            tempDict["jobStatus"].append(status["type"])
         returnList.append(tempDict)
 
 
