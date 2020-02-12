@@ -10,6 +10,8 @@ config.load_kube_config()
 
 v1 = client.CoreV1Api()
 appsv1 = client.AppsV1Api()
+# batchv1=client.BatchV1Api()
+batchv1 = client.BatchV1Api()
 
 from flask_cors import CORS
 
@@ -22,6 +24,7 @@ from src.routes.deployments import *
 from src.routes.pods import *
 from src.routes.nodes import *
 from src.routes.namespaces import *
+from src.routes.jobs import *
 
 @app.route('/test')
 def testRoute():
