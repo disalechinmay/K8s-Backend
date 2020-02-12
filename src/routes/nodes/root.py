@@ -3,7 +3,7 @@ from __main__ import v1
 from flask import jsonify
 import json
 
-@app.route('/nodes/', methods=['GET'])
+@app.route('/nodes', methods=['GET'])
 def getNodes():
 
 	allNodes = v1.list_node().to_dict()

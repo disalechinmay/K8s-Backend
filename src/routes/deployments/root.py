@@ -3,7 +3,7 @@ from __main__ import appsv1
 from flask import jsonify, request
 import json
 
-@app.route('/deployments/', methods=['GET'])
+@app.route('/deployments', methods=['GET'])
 def getDeployments():
 
 	# Get query param "namespace", if not present set to "default"
@@ -48,6 +48,5 @@ def getDeployments():
 	return jsonify(
 		status = "SUCCESS",
 		statusDetails = "Returning data from /deployments/ endpoint.",
-		payLoad = returnList,
-		raw = allDeployments
+		payLoad = returnList
 		)
