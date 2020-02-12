@@ -37,7 +37,7 @@ def pageNotFound(e):
 		status = "FAILURE", 
 		statusDetails = "You have reached an invalid endpoint.",
 		payLoad = None
-		)
+		), 404
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

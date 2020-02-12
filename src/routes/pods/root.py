@@ -3,7 +3,7 @@ from __main__ import v1
 from flask import jsonify, request
 import json
 
-@app.route('/pods/', methods=['GET'])
+@app.route('/pods', methods=['GET'])
 def getPods():
 
 	# Get query param "namespace", if not present set to "default"
