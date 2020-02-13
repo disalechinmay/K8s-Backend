@@ -2,7 +2,6 @@ from __main__ import app, cross_origin, v1
 from flask import jsonify, request
 import json
 
-
 @app.route('/pods/', methods=['GET'])
 @cross_origin(supports_credentials=True)
 def getPods():

@@ -2,7 +2,6 @@ from __main__ import app, v1, cross_origin
 from flask import jsonify
 import json
 
-
 @app.route('/nodes/', methods=['GET'])
 @cross_origin(supports_credentials=True)
 def getNodes():

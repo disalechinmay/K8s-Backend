@@ -2,7 +2,6 @@ from __main__ import app, appsv1, cross_origin
 from flask import jsonify, request
 import json
 
-
 @app.route('/deployments/', methods=['GET'])
 @cross_origin(supports_credentials=True)
 def getDeployments():
