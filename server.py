@@ -13,21 +13,10 @@ appsv1 = client.AppsV1Api()
 # batchv1=client.BatchV1Api()
 batchv1 = client.BatchV1Api()
 
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
-
-@
-
-# @app.after_request
-# def after_request(response):
-# 	print("INSIDE")
-# 	print(response.headers)
-# 	response.headers.add('Access-Control-Allow-Origin', '*')
-# 	response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-# 	response.headers.add('Access-Control-Allow-Methods', 'GET,POST')
-# 	print(response.headers)
-# 	return response
+CORS(app)
 
 from src.routes.services import *
 from src.routes.deployments import *
@@ -35,14 +24,6 @@ from src.routes.pods import *
 from src.routes.nodes import *
 from src.routes.namespaces import *
 from src.routes.jobs import *
-
-@app.route('/test')
-def testRoute():
-    return jsonify(
-    	status = "SUCCESS",
-    	statusDetails = "Returning data from /test endpoint.",
-    	payLoad = "Testing /test endpoint."
-    	)
 
 @app.errorhandler(404)
 def pageNotFound(e):

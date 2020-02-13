@@ -1,26 +1,27 @@
-from __main__ import app
-from __main__ import v1
+from __main__ import app, v1, cross_origin
 from flask import jsonify
 import json
 
+
 @app.route('/nodes/', methods=['GET'])
+@cross_origin(supports_credentials=True)
 def getNodes():
 
-	allNodes = v1.list_node().to_dict()
+    allNodes = v1.list_node().to_dict()
 
-	returnList = []
+    returnList = []
 
-	for node in allNodes["items"]:
-		tempDict = {}
-		tempDict["nodeName"] = node["metadata"]["name"]
-		tempDict["nodeLabels"] = node["metadata"]["labels"]
-		tempDict["nodeAnnotations"] = node["metadata"]["annotations"]
-		tempDict["nodeCapacity"] = node["status"]["capacity"]
+    for node in allNodes["items"]:
+        tempDict = {}
+        tempDict["nodeName"] = node["metadata"]["name"]
+        tempDict["nodeLabels"] = node["metadata"]["labels"]
+        tempDict["nodeAnnotations"] = node["metadata"]["annotations"]
+        tempDict["nodeCapacity"] = node["status"]["capacity"]
 
-		returnList.append(tempDict)
+        returnList.append(tempDict)
 
-	return jsonify(
-		status = "SUCCESS",
-		statusDetails = "Returning data from /nodes/ endpoint.",
-		payLoad = returnList
-		)
+    return jsonify(
+        status="SUCCESS",
+        statusDetails="Returning data from /nodes/ endpoint.",
+        payLoad=returnList
+    )
