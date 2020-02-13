@@ -1,6 +1,6 @@
 # Read APIRef.txt before working on this repo.
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, make_response
 from kubernetes import client, config
 from flask_cors import CORS
 
@@ -13,11 +13,10 @@ appsv1 = client.AppsV1Api()
 # batchv1=client.BatchV1Api()
 batchv1 = client.BatchV1Api()
 
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 CORS(app)
-
 
 from src.routes.services import *
 from src.routes.deployments import *
@@ -25,14 +24,6 @@ from src.routes.pods import *
 from src.routes.nodes import *
 from src.routes.namespaces import *
 from src.routes.jobs import *
-
-@app.route('/test')
-def testRoute():
-    return jsonify(
-    	status = "SUCCESS",
-    	statusDetails = "Returning data from /test endpoint.",
-    	payLoad = "Testing /test endpoint."
-    	)
 
 @app.errorhandler(404)
 def pageNotFound(e):
