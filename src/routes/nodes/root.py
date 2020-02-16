@@ -2,7 +2,7 @@ from __main__ import app, v1, cross_origin
 from flask import jsonify
 import json
 
-@app.route('/nodes/', methods=['GET'])
+@app.route('/nodes', methods=['GET'])
 @cross_origin(supports_credentials=True)
 def getNodes():
 
@@ -21,6 +21,6 @@ def getNodes():
 
     return jsonify(
         status="SUCCESS",
-        statusDetails="Returning data from /nodes/ endpoint.",
+        statusDetails="Returning data from /nodes endpoint.",
         payLoad=returnList
     )

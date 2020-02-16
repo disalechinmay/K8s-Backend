@@ -3,7 +3,7 @@ from flask import jsonify, request
 import json
 
 
-@app.route('/jobs/', methods=['GET'])
+@app.route('/jobs', methods=['GET'])
 @cross_origin(supports_credentials=True)
 def getjobs():
     namespace = request.args.get("namespace")
@@ -32,7 +32,7 @@ def getjobs():
 
     return jsonify(
         status="SUCCESS",
-        statusDetails="Returning data from /jobs/ endpoint.",
+        statusDetails="Returning data from /jobs endpoint.",
         payLoad=returnList,
 
     )

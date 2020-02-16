@@ -2,7 +2,7 @@ from __main__ import app, appsv1, cross_origin
 from flask import jsonify, request
 import json
 
-@app.route('/deployments/', methods=['GET'])
+@app.route('/deployments', methods=['GET'])
 @cross_origin(supports_credentials=True)
 def getDeployments():
 
@@ -44,7 +44,7 @@ def getDeployments():
 
     return jsonify(
         status="SUCCESS",
-        statusDetails="Returning data from /deployments/ endpoint.",
+        statusDetails="Returning data from /deployments endpoint.",
         payLoad=returnList,
         raw=allDeployments
     )

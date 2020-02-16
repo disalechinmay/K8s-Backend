@@ -3,7 +3,7 @@ from flask import jsonify
 import json
 
 
-@app.route('/namespaces/', methods=['GET'])
+@app.route('/namespaces', methods=['GET'])
 @cross_origin(supports_credentials=True)
 def getNamespaces():
 
@@ -16,6 +16,6 @@ def getNamespaces():
 
     return jsonify(
         status="SUCCESS",
-        statusDetails="Returning data from /namespaces/ endpoint.",
+        statusDetails="Returning data from /namespaces endpoint.",
         payLoad=namespaceList
     )
