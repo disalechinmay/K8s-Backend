@@ -3,7 +3,7 @@ from __main__ import v1
 from flask import jsonify, request
 import json
 
-@app.route('/services/', methods=['GET'])
+@app.route('/servicesx', methods=['GET'])
 def getServices():
 
 	# Get query param "namespace", if not present set to "default"
@@ -41,6 +41,6 @@ def getServices():
 
 	return jsonify(
 		status = "SUCCESS",
-		statusDetails = "Returning data from /services/ endpoint.",
+		statusDetails = "Returning data from /services endpoint.",
 		payLoad = returnList
 		)

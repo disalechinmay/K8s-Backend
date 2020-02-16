@@ -2,7 +2,7 @@ from __main__ import app, cross_origin, v1
 from flask import jsonify, request
 import json
 
-@app.route('/pods/', methods=['GET'])
+@app.route('/pods', methods=['GET'])
 @cross_origin(supports_credentials=True)
 def getPods():
 
@@ -29,12 +29,12 @@ def getPods():
 
     return jsonify(
         status="SUCCESS",
-        statusDetails="Returning data from /pods/ endpoint.",
+        statusDetails="Returning data from /pods endpoint.",
         payLoad=returnList
     )
 
 
-@app.route('/pods/', methods=['DELETE'])
+@app.route('/pods', methods=['DELETE'])
 @cross_origin(supports_credentials=True)
 def deletePod():
     requestJSON = request.get_json()
