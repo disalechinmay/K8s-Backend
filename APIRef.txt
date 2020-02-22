@@ -1,8 +1,70 @@
+**********
 Every route will return a JSON response.
-
 Every route (including invalid routes) will have following two mandatory fields:
 	- status: ["SUCCESS" | "FAILURE"]
 	- statusDetails: "A message giving more details of the same..."
-	- payLoad: (Only if status is "SUCCESS")
+	
+	- payLoad: Only if status is "SUCCESS".
+			   Contains any data returned.
+**********
 
-Some random text
+
+Routes Set Up:
+--------------
+	
+	Invalid endpoint handler (404):
+		# Returns: 	{
+						"payLoad": null, 
+						"status": "FAILURE", 
+						"statusDetails": "You have reached an invalid endpoint."
+					}
+
+	---------------------------------------------
+
+	/namespaces
+		# Usage: Returns a list of all namespaces setup in the cluster.
+		# Method: GET
+		# Params: None
+
+	---------------------------------------------
+
+	/nodes
+		# Usage: Returns a list of all nodes present in the cluster.
+		# Method: GET
+		# Params: None
+
+	---------------------------------------------
+
+	/pods
+		# Usage: Returns a list of all pods present in the specified namespace.
+		# Method: GET
+		# Params: namespace = "default"
+
+	/pods
+		# Usage: Deletes a pod by podName & namespace specified in request.
+		# Method: DELETE
+		# Request Body: JSON {
+		#                        podName: "",
+		#                        namespace: ""
+		#                    }
+
+	---------------------------------------------
+
+	/deployments
+		# Usage: Returns a list of all deployments present in the specified namespace.
+		# Method: GET
+		# Params: namespace = "default"
+
+	---------------------------------------------
+
+	/servicesx
+		# Usage: Returns a list of all services present in the specified namespace.
+		# Method: GET
+		# Params: namespace = "default"
+
+	---------------------------------------------
+
+	/jobs
+		# Usage: Returns a list of all jobs present in the specified namespace.
+		# Method: GET
+		# Params: namespace = "default"

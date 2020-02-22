@@ -2,8 +2,11 @@ from __main__ import app, cross_origin, v1
 from flask import jsonify, request
 import json
 
-@app.route('/pods', methods=['GET'])
-@cross_origin(supports_credentials=True)
+# Usage: Returns a list of all pods present in the specified namespace.
+# Method: GET
+# Params: namespace = "default"
+@app.route('/pods', methods = ['GET'])
+@cross_origin(supports_credentials = True)
 def getPods():
 
     # Get query param "namespace", if not present set to "default"
@@ -28,21 +31,30 @@ def getPods():
         returnList.append(tempDict)
 
     return jsonify(
-        status="SUCCESS",
-        statusDetails="Returning data from /pods endpoint.",
-        payLoad=returnList
+        status = "SUCCESS",
+        statusDetails = "Returning data from /pods endpoint.",
+        payLoad = returnList
     )
 
-
-@app.route('/pods', methods=['DELETE'])
-@cross_origin(supports_credentials=True)
+# Usage: Deletes a pod by podName & namespace specified in request.
+# Method: DELETE
+# Request Body: JSON {
+#                        podName: "",
+#                        namespace: ""
+#                    }
+@app.route('/pods', methods = ['DELETE'])
+@cross_origin(supports_credentials = True)
 def deletePod():
+
+    # Retrieve request's JSON object
     requestJSON = request.get_json()
-    print(requestJSON)
 
     retVal = v1.delete_namespaced_pod(
-        requestJSON["podName"], requestJSON["namespace"])
+            requestJSON["podName"], requestJSON["namespace"]
+        )
 
-    print(retVal)
-
-    return "OK"
+    return jsonify(
+        status = "SUCCESS",
+        statusDetails = "Returning from /pods endpoint.",
+        payLoad = None
+    )

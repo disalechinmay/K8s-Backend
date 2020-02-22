@@ -1,9 +1,12 @@
-from __main__ import app
-from __main__ import v1
+from __main__ import app, v1, cross_origin
 from flask import jsonify, request
 import json
 
-@app.route('/servicesx', methods=['GET'])
+# Usage: Returns a list of all services present in the specified namespace.
+# Method: GET
+# Params: namespace = "default"
+@app.route('/servicesx', methods = ['GET'])
+@cross_origin(supports_credentials = True)
 def getServices():
 
 	# Get query param "namespace", if not present set to "default"
@@ -16,31 +19,23 @@ def getServices():
 	returnList = []
 
 	for service in allServices["items"]:
-		tempDict={}
-		tempDict["serviceName"]=service["metadata"]["name"]
-		tempDict["serviceType"]=service["spec"]["type"]
+		tempDict = {}
+		tempDict["serviceName"] = service["metadata"]["name"]
+		tempDict["serviceType"] = service["spec"]["type"]
 		tempDict["serviceLabels"] = service["metadata"]["labels"]
 		tempDict["serviceAnnotations"] = service["metadata"]["annotations"]
-		# if service["spec"]["selector"]["match_expressions"]:
-		# 	for key, value in service["spec"]["selector"]["match_expressions"].items():
-		# 		tempDict["serviceSelectors"][key] = value
-		tempDict["serviceSelectors"]=service["spec"]["selector"]
-		tempDict["servicePort"]=[]
-		tempDict["serviceTargetPort"]=[]
+		tempDict["serviceSelectors"] = service["spec"]["selector"]
+		tempDict["servicePort"] = []
+		tempDict["serviceTargetPort"] = []
+
 		for port in service["spec"]["ports"]:
 			tempDict["servicePort"].append(port["port"])
-			print(port)
 			tempDict["serviceTargetPort"].append(port["target_port"])
-		
-		# for port in service["spec"]["ports"]:
-			# tempDict["serviceTargetPort"].append(port["targetPort"])
-
 
 		returnList.append(tempDict)
 
-
 	return jsonify(
 		status = "SUCCESS",
-		statusDetails = "Returning data from /services endpoint.",
+		statusDetails = "Returning data from /servicesx endpoint.",
 		payLoad = returnList
-		)
+	)
