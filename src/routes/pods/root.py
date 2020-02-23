@@ -2,8 +2,11 @@ from __main__ import app, cross_origin, v1
 from flask import jsonify, request
 import json
 
-@app.route('/pods', methods=['GET'])
-@cross_origin(supports_credentials=True)
+# Usage: Returns a list of all pods present in the specified namespace.
+# Method: GET
+# Params: namespace = "default"
+@app.route('/pods', methods = ['GET'])
+@cross_origin(supports_credentials = True)
 def getPods():
 
     # Get query param "namespace", if not present set to "default"
@@ -20,6 +23,7 @@ def getPods():
         tempDict["podName"] = pod["metadata"]["name"]
         tempDict["podLabels"] = pod["metadata"]["labels"]
         tempDict["podAnnotations"] = pod["metadata"]["annotations"]
+        tempDict["podStatus"] = pod["status"]["phase"]
         tempDict["podContainers"] = []
 
         for container in pod["spec"]["containers"]:
@@ -28,21 +32,70 @@ def getPods():
         returnList.append(tempDict)
 
     return jsonify(
-        status="SUCCESS",
-        statusDetails="Returning data from /pods endpoint.",
-        payLoad=returnList
+        status = "SUCCESS",
+        statusDetails = "Returning data from /pods endpoint.",
+        payLoad = returnList
     )
 
-
-@app.route('/pods', methods=['DELETE'])
-@cross_origin(supports_credentials=True)
+# Usage: Deletes a pod by podName & namespace specified in request.
+# Method: DELETE
+# Request Body: JSON {
+#                        podName: "",
+#                        namespace: ""
+#                    }
+@app.route('/pods', methods = ['POST'])
+@cross_origin(supports_credentials = True)
 def deletePod():
+
+    # Retrieve request's JSON object
     requestJSON = request.get_json()
-    print(requestJSON)
 
     retVal = v1.delete_namespaced_pod(
-        requestJSON["podName"], requestJSON["namespace"])
+            requestJSON["podName"], requestJSON["namespace"]
+        ).to_dict()
 
-    print(retVal)
+    return jsonify(
+        status = "SUCCESS",
+        statusDetails = "Returning from /pods endpoint.",
+        payLoad = retVal
+    )
 
-    return "OK"
+# Usage: Returns list of exposures by podName & namespace specified in request.
+# Method: GET
+# Params: namespace, podName
+@app.route('/pods/exposure', methods = ['GET'])
+@cross_origin(supports_credentials = True)
+def getPodExposure():
+
+    namespace = request.args.get("namespace")
+    podName = request.args.get("podName")
+
+    allServices = v1.list_namespaced_service(namespace).to_dict()
+    
+    podInfo = v1.read_namespaced_pod(name = podName, namespace = namespace).to_dict()
+    podLabels = podInfo["metadata"]["labels"]
+
+    exposures = []
+
+    for service in allServices["items"]:
+        selectors = service["spec"]["selector"]
+        if selectors is None:
+            continue
+
+        for key in selectors:
+            if key in podLabels:
+                if podLabels[key] == selectors[key] :
+
+                    for port in service["spec"]["ports"]:                        
+                        exposures.append({
+                                "serviceName": service["metadata"]["name"],
+                                "port": port["port"],
+                                "targetPort": port["target_port"],
+                                "serviceType": service["spec"]["type"]
+                            })
+
+    return jsonify(
+        status = "SUCCESS",
+        statusDetails = "Returning from /pods/exposure endpoint.",
+        payLoad = exposures
+    )

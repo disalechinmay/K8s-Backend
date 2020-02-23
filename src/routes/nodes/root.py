@@ -2,8 +2,11 @@ from __main__ import app, v1, cross_origin
 from flask import jsonify
 import json
 
-@app.route('/nodes', methods=['GET'])
-@cross_origin(supports_credentials=True)
+# Usage: Returns a list of all nodes present in the cluster.
+# Method: GET
+# Params: None
+@app.route('/nodes', methods = ['GET'])
+@cross_origin(supports_credentials = True)
 def getNodes():
 
     allNodes = v1.list_node().to_dict()
@@ -20,7 +23,7 @@ def getNodes():
         returnList.append(tempDict)
 
     return jsonify(
-        status="SUCCESS",
-        statusDetails="Returning data from /nodes endpoint.",
-        payLoad=returnList
+        status = "SUCCESS",
+        statusDetails = "Returning data from /nodes endpoint.",
+        payLoad = returnList
     )

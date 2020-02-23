@@ -3,8 +3,11 @@ from flask import jsonify
 import json
 
 
-@app.route('/namespaces', methods=['GET'])
-@cross_origin(supports_credentials=True)
+# Usage: Returns a list of all namespaces setup in the cluster.
+# Method: GET
+# Params: None
+@app.route('/namespaces', methods = ['GET'])
+@cross_origin(supports_credentials = True)
 def getNamespaces():
 
     allNamespaces = v1.list_namespace().to_dict()
@@ -15,7 +18,7 @@ def getNamespaces():
         namespaceList.append(namespace["metadata"]["name"])
 
     return jsonify(
-        status="SUCCESS",
-        statusDetails="Returning data from /namespaces endpoint.",
-        payLoad=namespaceList
+        status = "SUCCESS",
+        statusDetails = "Returning data from /namespaces endpoint.",
+        payLoad = namespaceList
     )

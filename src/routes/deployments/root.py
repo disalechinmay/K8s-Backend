@@ -2,8 +2,11 @@ from __main__ import app, appsv1, cross_origin
 from flask import jsonify, request
 import json
 
-@app.route('/deployments', methods=['GET'])
-@cross_origin(supports_credentials=True)
+# Usage: Returns a list of all deployments present in the specified namespace.
+# Method: GET
+# Params: namespace = "default"
+@app.route('/deployments', methods = ['GET'])
+@cross_origin(supports_credentials = True)
 def getDeployments():
 
     # Get query param "namespace", if not present set to "default"
@@ -43,8 +46,7 @@ def getDeployments():
         returnList.append(tempDict)
 
     return jsonify(
-        status="SUCCESS",
-        statusDetails="Returning data from /deployments endpoint.",
-        payLoad=returnList,
-        raw=allDeployments
+        status = "SUCCESS",
+        statusDetails = "Returning data from /deployments endpoint.",
+        payLoad = returnList
     )
