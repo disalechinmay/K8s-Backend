@@ -58,3 +58,43 @@ def deletePod():
         statusDetails = "Returning from /pods endpoint.",
         payLoad = None
     )
+
+# Usage: Returns list of exposures by podName & namespace specified in request.
+# Method: GET
+# Params: namespace, podName
+@app.route('/pods/exposure', methods = ['GET'])
+@cross_origin(supports_credentials = True)
+def getPodExposure():
+
+    namespace = request.args.get("namespace")
+    podName = request.args.get("podName")
+
+    allServices = v1.list_namespaced_service(namespace).to_dict()
+    
+    podInfo = v1.read_namespaced_pod(name = podName, namespace = namespace).to_dict()
+    podLabels = podInfo["metadata"]["labels"]
+
+    exposures = []
+
+    for service in allServices["items"]:
+        selectors = service["spec"]["selector"]
+        if selectors is None:
+            continue
+
+        for key in selectors:
+            if key in podLabels:
+                if podLabels[key] == selectors[key] :
+
+                    for port in service["spec"]["ports"]:                        
+                        exposures.append({
+                                "serviceName": service["metadata"]["name"],
+                                "port": port["port"],
+                                "targetPort": port["target_port"],
+                                "serviceType": service["spec"]["type"]
+                            })
+
+    return jsonify(
+        status = "SUCCESS",
+        statusDetails = "Returning from /pods/exposure endpoint.",
+        payLoad = exposures
+    )
