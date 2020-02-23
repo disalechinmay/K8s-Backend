@@ -23,6 +23,7 @@ def getPods():
         tempDict["podName"] = pod["metadata"]["name"]
         tempDict["podLabels"] = pod["metadata"]["labels"]
         tempDict["podAnnotations"] = pod["metadata"]["annotations"]
+        tempDict["podStatus"] = pod["status"]["phase"]
         tempDict["podContainers"] = []
 
         for container in pod["spec"]["containers"]:
@@ -42,7 +43,7 @@ def getPods():
 #                        podName: "",
 #                        namespace: ""
 #                    }
-@app.route('/pods', methods = ['DELETE'])
+@app.route('/pods', methods = ['POST'])
 @cross_origin(supports_credentials = True)
 def deletePod():
 
@@ -51,12 +52,12 @@ def deletePod():
 
     retVal = v1.delete_namespaced_pod(
             requestJSON["podName"], requestJSON["namespace"]
-        )
+        ).to_dict()
 
     return jsonify(
         status = "SUCCESS",
         statusDetails = "Returning from /pods endpoint.",
-        payLoad = None
+        payLoad = retVal
     )
 
 # Usage: Returns list of exposures by podName & namespace specified in request.

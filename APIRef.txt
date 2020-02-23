@@ -48,6 +48,11 @@ Routes Set Up:
 		#                        namespace: ""
 		#                    }
 
+	/pods/exposure
+		# Usage: Returns list of exposures by podName & namespace specified in request.
+		# Method: GET
+		# Params: namespace, podName
+
 	---------------------------------------------
 
 	/deployments
