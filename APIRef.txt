@@ -60,6 +60,10 @@ Routes Set Up:
 		# Method: GET
 		# Params: namespace = "default"
 
+	/deployment
+		# Usage: Returns a list of all deployments present in the specified namespace.
+		# Method: GET
+		# Params: namespace, resourceName
 	---------------------------------------------
 
 	/servicesx

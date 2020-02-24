@@ -1,4 +1,4 @@
-from __main__ import app, cross_origin, v1
+from __main__ import app, v1
 from flask import jsonify
 import json
 
@@ -7,7 +7,6 @@ import json
 # Method: GET
 # Params: None
 @app.route('/namespaces', methods = ['GET'])
-@cross_origin(supports_credentials = True)
 def getNamespaces():
 
     allNamespaces = v1.list_namespace().to_dict()

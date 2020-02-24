@@ -1,4 +1,4 @@
-from __main__ import app, batchv1, cross_origin
+from __main__ import app, batchv1
 from flask import jsonify, request
 import json
 
@@ -6,7 +6,6 @@ import json
 # Method: GET
 # Params: namespace = "default"
 @app.route('/jobs', methods = ['GET'])
-@cross_origin(supports_credentials = True)
 def getjobs():
 
     # Get query param "namespace", if not present set to "default"
