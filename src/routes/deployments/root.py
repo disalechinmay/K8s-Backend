@@ -107,13 +107,13 @@ def patchDeployment():
 
         return jsonify(
             status = "SUCCESS",
-            statusDetails = "Returning data from /deployment endpoint.",
-            payLoad = str(result.status)
+            statusDetails = "Deployment patched successfully.",
+            payLoad = result.status.to_dict()
         )
 
     except Exception as e:
         return jsonify(
                 status = "FAILURE",
-                statusDetails = "Returning data from /deployment endpoint.",
-                payLoad = e.body
+                statusDetails = "Deployment patch failed.",
+                payLoad = json.loads(e.body)
             )
