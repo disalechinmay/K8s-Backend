@@ -1,4 +1,4 @@
-from __main__ import app, v1, cross_origin
+from __main__ import app, v1
 from flask import jsonify
 import json
 
@@ -6,7 +6,6 @@ import json
 # Method: GET
 # Params: None
 @app.route('/nodes', methods = ['GET'])
-@cross_origin(supports_credentials = True)
 def getNodes():
 
     allNodes = v1.list_node().to_dict()

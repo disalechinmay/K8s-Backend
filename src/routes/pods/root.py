@@ -1,4 +1,4 @@
-from __main__ import app, cross_origin, v1
+from __main__ import app, v1
 from flask import jsonify, request
 import json
 
@@ -6,7 +6,6 @@ import json
 # Method: GET
 # Params: namespace = "default"
 @app.route('/pods', methods = ['GET'])
-@cross_origin(supports_credentials = True)
 def getPods():
 
     # Get query param "namespace", if not present set to "default"
@@ -44,7 +43,6 @@ def getPods():
 #                        namespace: ""
 #                    }
 @app.route('/pods', methods = ['POST'])
-@cross_origin(supports_credentials = True)
 def deletePod():
 
     # Retrieve request's JSON object
@@ -64,7 +62,6 @@ def deletePod():
 # Method: GET
 # Params: namespace, podName
 @app.route('/pods/exposure', methods = ['GET'])
-@cross_origin(supports_credentials = True)
 def getPodExposure():
 
     namespace = request.args.get("namespace")
