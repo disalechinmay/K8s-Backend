@@ -22,14 +22,14 @@ def getjobs():
         tempDict["jobName"] = jobs["metadata"]["name"]
         tempDict["jobLabels"] = jobs["metadata"]["labels"]
         tempDict["jobAnnotations"] = jobs["metadata"]["annotations"]
-        tempDict["jobStatus"] = []
         tempDict["jobTemplate"] = []
+        tempDict["jobTargetCompletions"] = jobs["spec"]["completions"]
+        tempDict["jobCurrentCompletions"] = jobs["status"]["succeeded"]
 
         for container in jobs["spec"]["template"]["spec"]["containers"]:
             tempDict["jobTemplate"].append(container["image"])
 
-        for status in jobs["status"]["conditions"]:
-            tempDict["jobStatus"].append(status["type"])
+      
 
         returnList.append(tempDict)
 
