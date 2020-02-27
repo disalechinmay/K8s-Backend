@@ -8,8 +8,7 @@ import json
 @app.route('/configmaps', methods = ['GET'])
 def getConfigMaps():
 
-# Get query param "namespace", if not present set to "default"
-
+	# Get query param "namespace", if not present set to "default"
 	namespace = request.args.get("namespace")
 	if namespace is None:
 		namespace = "default"
@@ -20,9 +19,9 @@ def getConfigMaps():
 
 	for configMap in allConfigMaps["items"]:
 		tempDict={}
-		tempDict["configMapName"] = configMap["metadata"]["name"]
-		tempDict["configMapData"]=configMap["data"]
 
+		tempDict["configMapName"] = configMap["metadata"]["name"]
+		tempDict["configMapData"] = configMap["data"]
 		tempDict["configMapLabels"] = configMap["metadata"]["labels"]
 		tempDict["configMapAnnotations"] = configMap["metadata"]["annotations"]
 
@@ -31,7 +30,7 @@ def getConfigMaps():
 
 	return jsonify(
         status = "SUCCESS",
-        statusDetails = "Returning data from /configMaps endpoint.",
+        statusDetails = "Returning a list of config maps of '" + namespace + "' namespace.",
         payLoad = returnList
     )
 

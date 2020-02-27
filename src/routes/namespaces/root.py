@@ -18,6 +18,6 @@ def getNamespaces():
 
     return jsonify(
         status = "SUCCESS",
-        statusDetails = "Returning data from /namespaces endpoint.",
+        statusDetails = "Returning a list of namespaces present in the cluster.",
         payLoad = namespaceList
     )

@@ -23,7 +23,6 @@ def getDeployments():
         tempDict["deploymentLabels"] = deployment["metadata"]["labels"]
         tempDict["deploymentAnnotations"] = deployment["metadata"]["annotations"]
         tempDict["deploymentReplicas"] = deployment["spec"]["replicas"]
-        print(deployment["status"])
         tempDict["deploymentReadyReplicas"] = deployment["status"]["ready_replicas"]
         tempDict["deploymentSelectors"] = {}
 
@@ -48,53 +47,53 @@ def getDeployments():
 
     return jsonify(
         status = "SUCCESS",
-        statusDetails = "Returning data from /deployments endpoint.",
+        statusDetails = "Returning a list of deployments in '" + namespace + "' namespace.",
         payLoad = returnList
     )
 
 
-# Usage: Returns a list of all deployments present in the specified namespace.
+# Usage: Returns a deployment present in the specified namespace.
 # Method: GET
-# Params: namespace, resourceName
+# Params: namespace, deploymentName
 @app.route('/deployment', methods = ['GET'])
 def getDeployment():
 
     # Get query param "namespace", if not present set to "default"
     namespace = request.args.get("namespace")    
-    resourceName = request.args.get("resourceName")
+    deploymentName = request.args.get("deploymentName")
 
-    if (namespace is None) and (resourceName is None):
+    if (namespace is None) and (deploymentName is None):
         return jsonify(
             status = "FAILURE",
-            statusDetails = "Namespace & resource name is not specified as query params.",
-            payLoad = returnList
+            statusDetails = "Namespace & deployment name is not specified as query params.",
+            payLoad = None
         )
 
     if(namespace is None):
         return jsonify(
             status = "FAILURE",
             statusDetails = "Namespace is not specified as query params.",
-            payLoad = returnList
+            payLoad = None
         )
 
-    if(resourceName is None):
+    if(deploymentName is None):
         return jsonify(
             status = "FAILURE",
-            statusDetails = "Resource name is not specified as query params.",
-            payLoad = returnList
+            statusDetails = "Deployment name is not specified as query params.",
+            payLoad = None
         )
 
-    deployment = appsv1.read_namespaced_deployment(namespace = namespace, name = resourceName).to_dict()
+    deployment = appsv1.read_namespaced_deployment(namespace = namespace, name = deploymentName).to_dict()
 
     return jsonify(
         status = "SUCCESS",
-        statusDetails = "Returning data from /deployment endpoint.",
+        statusDetails = "Returning deployment '" + deploymentName + "' of '" + namespace + "' namespace.",
         payLoad = deployment
     )
 
 # Usage: Returns a list of all deployments present in the specified namespace.
 # Method: GET
-# Params: namespace, resourceName
+# Params: namespace, deploymentName
 @app.route('/deployment', methods = ['PATCH'])
 def patchDeployment():
     try: 
@@ -103,7 +102,7 @@ def patchDeployment():
 
         result = appsv1.patch_namespaced_deployment(
                 namespace = requestJSON["namespace"],
-                name = requestJSON["resourceName"],
+                name = requestJSON["deploymentName"],
                 body = requestJSON["body"]
             )
 
