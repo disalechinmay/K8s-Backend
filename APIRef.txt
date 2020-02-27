@@ -14,10 +14,25 @@ Routes Set Up:
 	
 	Invalid endpoint handler (404):
 		# Returns: 	{
-						"payLoad": null, 
-						"status": "FAILURE", 
-						"statusDetails": "You have reached an invalid endpoint."
-					}
+				status = "FAILURE", 
+				statusDetails = "You have reached an invalid endpoint.",
+				payLoad = {
+					"errorCode": error.code,
+					"errorName": error.name,
+					"errorDescription": error.description
+				}
+			}
+
+	Internal Server Error Handler (500):
+		# Returns: {
+				status = "FAILURE", 
+				statusDetails = "An internal server error has occurred.",
+				payLoad = {
+					"errorCode": 500,
+					"errorName": "Internal Server Error",
+					"errorDescription": str(error)
+				}
+			}
 
 	---------------------------------------------
 
@@ -40,7 +55,7 @@ Routes Set Up:
 		# Method: GET
 		# Params: namespace = "default"
 
-	/pods
+	/pod
 		# Usage: Deletes a pod by podName & namespace specified in request.
 		# Method: DELETE
 		# Request Body: JSON {
@@ -48,7 +63,7 @@ Routes Set Up:
 		#                        namespace: ""
 		#                    }
 
-	/pods/exposure
+	/pod/exposure
 		# Usage: Returns list of exposures by podName & namespace specified in request.
 		# Method: GET
 		# Params: namespace, podName
@@ -61,9 +76,14 @@ Routes Set Up:
 		# Params: namespace = "default"
 
 	/deployment
-		# Usage: Returns a list of all deployments present in the specified namespace.
+		# Usage: Returns a deployment present in the specified namespace.
 		# Method: GET
-		# Params: namespace, resourceName
+		# Params: namespace, deploymentName
+
+	/deployment
+		# Usage: Patches a deployment.
+		# Method: PATCH
+		# Params: namespace, deploymentName
 	---------------------------------------------
 
 	/servicesx
@@ -75,5 +95,19 @@ Routes Set Up:
 
 	/jobs
 		# Usage: Returns a list of all jobs present in the specified namespace.
+		# Method: GET
+		# Params: namespace = "default"
+
+	---------------------------------------------
+
+	/configmaps
+		# Usage: Returns a list of all config maps present in the specified namespace.
+		# Method: GET
+		# Params: namespace = "default"
+
+	---------------------------------------------
+
+	/secrets
+		# Usage: Returns a list of all secrets present in the specified namespace.
 		# Method: GET
 		# Params: namespace = "default"

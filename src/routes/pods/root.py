@@ -32,7 +32,7 @@ def getPods():
 
     return jsonify(
         status = "SUCCESS",
-        statusDetails = "Returning data from /pods endpoint.",
+        statusDetails = "Returning a list of pods in '" + namespace + "' namespace.",
         payLoad = returnList
     )
 
@@ -42,30 +42,74 @@ def getPods():
 #                        podName: "",
 #                        namespace: ""
 #                    }
-@app.route('/pods', methods = ['POST'])
+@app.route('/pod', methods = ['DELETE'])
 def deletePod():
 
     # Retrieve request's JSON object
     requestJSON = request.get_json()
 
-    retVal = v1.delete_namespaced_pod(
+    if (requestJSON["namespace"] is None) and (requestJSON["podName"] is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Namespace & pod name is not specified as body params.",
+            payLoad = None
+        )
+
+    if(requestJSON["namespace"] is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Namespace is not specified as body params.",
+            payLoad = None
+        )
+
+    if(requestJSON["podName"] is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Pod name is not specified as body params.",
+            payLoad = None
+        )
+
+
+    returnValue = v1.delete_namespaced_pod(
             requestJSON["podName"], requestJSON["namespace"]
         ).to_dict()
 
     return jsonify(
         status = "SUCCESS",
-        statusDetails = "Returning from /pods endpoint.",
-        payLoad = retVal
+        statusDetails = "Attempted to delete pod '" + requestJSON["podName"] + "' of '" + requestJSON["namespace"] + "' namespace.",
+        payLoad = None
     )
 
 # Usage: Returns list of exposures by podName & namespace specified in request.
 # Method: GET
 # Params: namespace, podName
-@app.route('/pods/exposure', methods = ['GET'])
+@app.route('/pod/exposure', methods = ['GET'])
 def getPodExposure():
 
     namespace = request.args.get("namespace")
     podName = request.args.get("podName")
+
+
+    if (namespace is None) and (podName is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Namespace & pod name is not specified as query params.",
+            payLoad = None
+        )
+
+    if(namespace is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Namespace is not specified as query params.",
+            payLoad = None
+        )
+
+    if(podName is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Pod name is not specified as query params.",
+            payLoad = None
+        )
 
     allServices = v1.list_namespaced_service(namespace).to_dict()
     
@@ -93,6 +137,6 @@ def getPodExposure():
 
     return jsonify(
         status = "SUCCESS",
-        statusDetails = "Returning from /pods/exposure endpoint.",
+        statusDetails = "Returning a list of exposures for pod '" + podName + "' of '" + namespace + "' namespace.",
         payLoad = exposures
     )

@@ -35,6 +35,6 @@ def getServices():
 
 	return jsonify(
 		status = "SUCCESS",
-		statusDetails = "Returning data from /servicesx endpoint.",
+		statusDetails = "Returning a list of services of '" + namespace + "' namespace.",
 		payLoad = returnList
 	)

@@ -23,6 +23,6 @@ def getNodes():
 
     return jsonify(
         status = "SUCCESS",
-        statusDetails = "Returning data from /nodes endpoint.",
+        statusDetails = "Returning a list of nodes present in the cluster.",
         payLoad = returnList
     )

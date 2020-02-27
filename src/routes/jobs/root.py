@@ -27,14 +27,12 @@ def getjobs():
         tempDict["jobCurrentCompletions"] = jobs["status"]["succeeded"]
 
         for container in jobs["spec"]["template"]["spec"]["containers"]:
-            tempDict["jobTemplate"].append(container["image"])
-
-      
+            tempDict["jobTemplate"].append(container["image"])      
 
         returnList.append(tempDict)
 
     return jsonify(
         status = "SUCCESS",
-        statusDetails = "Returning data from /jobs endpoint.",
+        statusDetails = "Returning a list of jobs of '" + namespace + "' namespace.",
         payLoad = returnList
     )
