@@ -25,6 +25,8 @@ from src.routes.deployments import *
 from src.routes.pods import *
 from src.routes.nodes import *
 from src.routes.namespaces import *
+from src.routes.configmaps import *
+
 
 # Endpoint to handle invalid API endpoints
 @app.errorhandler(404)
