@@ -23,6 +23,8 @@ def getDeployments():
         tempDict["deploymentLabels"] = deployment["metadata"]["labels"]
         tempDict["deploymentAnnotations"] = deployment["metadata"]["annotations"]
         tempDict["deploymentReplicas"] = deployment["spec"]["replicas"]
+        print(deployment["status"])
+        tempDict["deploymentReadyReplicas"] = deployment["status"]["ready_replicas"]
         tempDict["deploymentSelectors"] = {}
 
         # Clubbing all kinds of selectors into deploymentSelectors
@@ -110,7 +112,7 @@ def patchDeployment():
             statusDetails = "Deployment patched successfully.",
             payLoad = result.status.to_dict()
         )
-
+        
     except Exception as e:
         return jsonify(
                 status = "FAILURE",
