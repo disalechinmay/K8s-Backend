@@ -1,4 +1,4 @@
-from __main__ import app, v1
+from __main__ import app, v1, client
 from flask import jsonify, request
 import json
 
@@ -19,7 +19,6 @@ def getSecrets():
 
 	for secret in allSecrets["items"]:
 		tempDict={}
-
 		tempDict["secretName"] = secret["metadata"]["name"]
 		tempDict["secretData"] = secret["data"]
 		tempDict["secretLabels"] = secret["metadata"]["labels"]
@@ -100,3 +99,54 @@ def patchsecret():
                 statusDetails = "Secret patch failed.",
                 payLoad = str(e)
             )
+
+# Usage: Creates a secret in the specified namespace.
+# Method: POST
+# Body Params: namespace, secretName, secretData
+@app.route('/secret', methods = ['POST'])
+def createSecret():
+	try:
+	    # Retrieve request's JSON object
+	    requestJSON = request.get_json()
+
+	    data = {}
+	    for pair in requestJSON["secretData"]:
+	    	data[str(pair["key"])] = str(pair["value"])
+
+	    meta = client.V1ObjectMeta(name = requestJSON["secretName"])
+	    body = client.V1Secret(
+		    	metadata = meta,
+		    	string_data = data
+	    	)
+
+	    response = v1.create_namespaced_secret(namespace = requestJSON["namespace"], body = body).to_dict()
+
+	    return jsonify(
+	        status = "SUCCESS",
+	        statusDetails = "Creating secret '" + requestJSON["secretName"] + "' of '" + requestJSON["namespace"] + "' namespace.",
+	        payLoad = response
+	    )
+
+	except Exception as e:
+		print(str(e))
+
+
+# Usage: Deletes a secret in the specified namespace.
+# Method: DELETE
+# Body Params: namespace, secretName
+@app.route('/secret', methods = ['DELETE'])
+def deleteSecret():
+	try:
+	    # Retrieve request's JSON object
+	    requestJSON = request.get_json()
+
+	    response = v1.delete_namespaced_secret(namespace = requestJSON["namespace"], name = requestJSON["secretName"]).to_dict()
+
+	    return jsonify(
+	        status = "SUCCESS",
+	        statusDetails = "Deleting secret '" + requestJSON["secretName"] + "' of '" + requestJSON["namespace"] + "' namespace.",
+	        payLoad = response
+	    )
+
+	except Exception as e:
+		print(str(e))
