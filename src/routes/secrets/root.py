@@ -106,29 +106,35 @@ def patchsecret():
 @app.route('/secret', methods = ['POST'])
 def createSecret():
 	try:
-	    # Retrieve request's JSON object
-	    requestJSON = request.get_json()
+		# Retrieve request's JSON object
+		requestJSON = request.get_json()
 
-	    data = {}
-	    for pair in requestJSON["secretData"]:
-	    	data[str(pair["key"])] = str(pair["value"])
+		data = {}
+		for pair in requestJSON["secretData"]:
+			data[str(pair["key"])] = str(pair["value"])
 
-	    meta = client.V1ObjectMeta(name = requestJSON["secretName"])
-	    body = client.V1Secret(
-		    	metadata = meta,
-		    	string_data = data
-	    	)
+		print(data)
 
-	    response = v1.create_namespaced_secret(namespace = requestJSON["namespace"], body = body).to_dict()
+		meta = client.V1ObjectMeta(name = requestJSON["secretName"])
+		body = client.V1Secret(
+				metadata = meta,
+				string_data = data
+			)
 
-	    return jsonify(
-	        status = "SUCCESS",
-	        statusDetails = "Creating secret '" + requestJSON["secretName"] + "' of '" + requestJSON["namespace"] + "' namespace.",
-	        payLoad = response
-	    )
+		response = v1.create_namespaced_secret(namespace = requestJSON["namespace"], body = body).to_dict()
+
+		return jsonify(
+				status = "SUCCESS",
+				statusDetails = "Secret created successfully.",
+				payLoad = response
+			)
 
 	except Exception as e:
-		print(str(e))
+		return jsonify(
+                status = "FAILURE",
+                statusDetails = "Secret creation failed.",
+                payLoad = json.loads(e.body)
+            )
 
 
 # Usage: Deletes a secret in the specified namespace.
