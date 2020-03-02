@@ -1,4 +1,4 @@
-from __main__ import app, v1
+from __main__ import app, v1, client
 from flask import jsonify, request
 import json
 
@@ -35,6 +35,47 @@ def getPods():
         statusDetails = "Returning a list of pods in '" + namespace + "' namespace.",
         payLoad = returnList
     )
+
+
+# Usage: Returns a pod present in the specified namespace.
+# Method: GET
+# Params: namespace, podName
+@app.route('/pod', methods = ['GET'])
+def getPod():
+
+    # Get query param "namespace", if not present set to "default"
+    namespace = request.args.get("namespace")    
+    podName = request.args.get("podName")
+
+    if (namespace is None) and (podName is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Namespace & pod name is not specified as query params.",
+            payLoad = None
+        )
+
+    if(namespace is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Namespace is not specified as query params.",
+            payLoad = None
+        )
+
+    if(podName is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Pod name is not specified as query params.",
+            payLoad = None
+        )
+
+    pod = v1.read_namespaced_pod(namespace = namespace, name = podName).to_dict()
+
+    return jsonify(
+        status = "SUCCESS",
+        statusDetails = "Returning secret '" + podName + "' of '" + namespace + "' namespace.",
+        payLoad = pod
+    )
+
 
 # Usage: Deletes a pod by podName & namespace specified in request.
 # Method: DELETE
@@ -140,3 +181,69 @@ def getPodExposure():
         statusDetails = "Returning a list of exposures for pod '" + podName + "' of '" + namespace + "' namespace.",
         payLoad = exposures
     )
+
+
+# Usage: Creates a pod in the specified namespace.
+# Method: POST
+# Body Params: namespace, podName, podImage, podVars
+@app.route('/pod', methods = ['POST'])
+def createPod():
+    try:
+        # Retrieve request's JSON object
+        requestJSON = request.get_json()
+
+        meta = client.V1ObjectMeta(name = requestJSON["podName"])
+
+        envList = []
+        for variableObj in requestJSON["podVars"] :
+
+            keySel = client.V1ConfigMapKeySelector(
+                    name = variableObj["configMapName"],
+                    key = variableObj["variable"]
+                )
+
+            envVarSource = client.V1EnvVarSource(
+                    config_map_key_ref = keySel
+                )
+
+
+            envVar = client.V1EnvVar(
+                    name = variableObj["variable"],
+                    value_from = envVarSource
+                )
+
+            envList.append(envVar)
+
+        containerList = []
+        container = client.V1Container(
+                name = requestJSON["podName"],
+                image = requestJSON["podImage"],
+                env = envList
+            )
+        containerList.append(container)
+
+        spec = client.V1PodSpec(
+                containers = containerList
+            )
+
+        body = client.V1Pod(
+                metadata = meta,
+                spec = spec
+            )
+
+        response = v1.create_namespaced_pod(namespace = requestJSON["namespace"], body = body).to_dict()
+
+        return jsonify(
+                status = "SUCCESS",
+                statusDetails = "Secret created successfully.",
+                payLoad = None
+            )
+
+    except Exception as e:
+        print(str(e))
+        return jsonify(
+                status = "FAILURE",
+                statusDetails = "Secret creation failed.",
+                payLoad = json.loads(e.body)
+            )
+
