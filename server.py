@@ -48,6 +48,7 @@ def pageNotFound(error):
 # Handles internal server errors
 @app.errorhandler(Exception)
 def internalServerError(error):
+	# print(error.body)
 	return jsonify(
 			status = "FAILURE", 
 			statusDetails = "An internal server error has occurred.",
