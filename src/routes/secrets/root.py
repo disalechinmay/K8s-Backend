@@ -1,6 +1,8 @@
 from __main__ import app, v1, client
 from flask import jsonify, request
 import json
+import base64
+import sys
 
 # Usage: Returns a list of all secrets present in the specified namespace.
 # Method: GET
@@ -20,7 +22,10 @@ def getSecrets():
 	for secret in allSecrets["items"]:
 		tempDict={}
 		tempDict["secretName"] = secret["metadata"]["name"]
-		tempDict["secretData"] = secret["data"]
+		tempDict["secretData"] = {}
+		for key in secret["data"]:
+			tempDict["secretData"][key] = base64.b64decode(secret["data"][key]).decode("utf-8")
+
 		tempDict["secretLabels"] = secret["metadata"]["labels"]
 		tempDict["secretAnnotations"] = secret["metadata"]["annotations"]
 
@@ -65,6 +70,8 @@ def getSecret():
         )
 
     secret = v1.read_namespaced_secret(namespace = namespace, name = secretName).to_dict()
+    for key in secret["data"]:
+        secret["data"][key] = base64.b64decode(secret["data"][key]).decode("utf-8")
 
     return jsonify(
         status = "SUCCESS",
@@ -72,7 +79,7 @@ def getSecret():
         payLoad = secret
     )
 
-# Usage: Returns a list of all secrets present in the specified namespace.
+# Usage: Patches a secret present in the specified namespace.
 # Method: GET
 # Params: namespace, secretName
 @app.route('/secret', methods = ['PATCH'])
@@ -80,6 +87,11 @@ def patchsecret():
     try: 
         # Retrieve request's JSON object
         requestJSON = request.get_json()
+
+        for key in requestJSON["body"]["data"]:
+            encoded = base64.b64encode(bytes(requestJSON["body"]["data"][key], "utf-8"))
+       	    requestJSON["body"]["data"][key] = encoded.decode("utf-8")
+
 
         result = v1.patch_namespaced_secret(
                 namespace = requestJSON["namespace"],
@@ -97,8 +109,47 @@ def patchsecret():
         return jsonify(
                 status = "FAILURE",
                 statusDetails = "Secret patch failed.",
-                payLoad = str(e)
+                payLoad = json.loads(e.body) if e.body else str(e)
             )
+
+
+# Usage: Replaces a secret secret present in the specified namespace.
+# Method: PUT
+# Params: namespace, secretName
+@app.route('/secret', methods = ['PUT'])
+def replaceSecret():
+    try: 
+        # Retrieve request's JSON object
+        requestJSON = request.get_json()
+
+        meta = client.V1ObjectMeta(name = requestJSON["secretName"],
+                labels = (requestJSON["body"]["metadata"]["labels"] if ("labels" in requestJSON["body"]["metadata"]) else None),
+                annotations = (requestJSON["body"]["metadata"]["annotations"] if ("annotations" in requestJSON["body"]["metadata"]) else None)
+            )
+        
+        body = client.V1Secret(
+            metadata = meta,
+            string_data = requestJSON["body"]["data"],
+            type = requestJSON["body"]["type"],
+            kind = requestJSON["body"]["kind"],
+            api_version = requestJSON["body"]["api_version"]
+        )
+
+        result = v1.replace_namespaced_secret(namespace = requestJSON["namespace"], name = requestJSON["secretName"], body = body).to_dict()
+
+        return jsonify(
+            status = "SUCCESS",
+            statusDetails = "Secret replaced successfully.",
+            payLoad = result
+        )
+        
+    except Exception as e:
+        return jsonify(
+                status = "FAILURE",
+                statusDetails = "Secret replacement failed.",
+                payLoad = json.loads(e.body) if e.body else str(e)
+            )
+
 
 # Usage: Creates a secret in the specified namespace.
 # Method: POST
@@ -112,8 +163,6 @@ def createSecret():
 		data = {}
 		for pair in requestJSON["secretData"]:
 			data[str(pair["key"])] = str(pair["value"])
-
-		print(data)
 
 		meta = client.V1ObjectMeta(name = requestJSON["secretName"])
 		body = client.V1Secret(
@@ -155,4 +204,8 @@ def deleteSecret():
 	    )
 
 	except Exception as e:
-		print(str(e))
+		return jsonify(
+                status = "FAILURE",
+                statusDetails = "Secret deletion failed.",
+                payLoad = json.loads(e.body)
+            )
