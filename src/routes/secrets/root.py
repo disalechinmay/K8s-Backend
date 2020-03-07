@@ -23,8 +23,9 @@ def getSecrets():
 		tempDict={}
 		tempDict["secretName"] = secret["metadata"]["name"]
 		tempDict["secretData"] = {}
-		for key in secret["data"]:
-			tempDict["secretData"][key] = base64.b64decode(secret["data"][key]).decode("utf-8")
+		if secret["data"] is not None:
+			for key in secret["data"]:
+				tempDict["secretData"][key] = base64.b64decode(secret["data"][key]).decode("utf-8")
 
 		tempDict["secretLabels"] = secret["metadata"]["labels"]
 		tempDict["secretAnnotations"] = secret["metadata"]["annotations"]
