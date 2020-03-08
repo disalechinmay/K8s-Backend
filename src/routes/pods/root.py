@@ -2,6 +2,13 @@ from __main__ import app, v1, client
 from flask import jsonify, request
 import json
 
+class FakeKubeResponse:
+    def __init__(self, obj):
+        self.data = json.dumps(obj)
+
+
+        
+
 # Usage: Returns a list of all pods present in the specified namespace.
 # Method: GET
 # Params: namespace = "default"
@@ -67,6 +74,7 @@ def getPod():
             statusDetails = "Pod name is not specified as query params.",
             payLoad = None
         )
+
 
     pod = v1.read_namespaced_pod(namespace = namespace, name = podName).to_dict()
 
@@ -156,25 +164,31 @@ def getPodExposure():
     
     podInfo = v1.read_namespaced_pod(name = podName, namespace = namespace).to_dict()
     podLabels = podInfo["metadata"]["labels"]
+    if podLabels is None:
+        podLabels = []
 
     exposures = []
 
-    for service in allServices["items"]:
-        selectors = service["spec"]["selector"]
-        if selectors is None:
-            continue
+    if allServices["items"] is not None:
+        for service in allServices["items"]:
+            selectors = service["spec"]["selector"]
+            if selectors is None:
+                continue
 
-        for key in selectors:
-            if key in podLabels:
-                if podLabels[key] == selectors[key] :
+            if selectors is not None:
+                for key in selectors:
+                    if key in podLabels:
+                        if podLabels[key] == selectors[key] :
 
-                    for port in service["spec"]["ports"]:                        
-                        exposures.append({
-                                "serviceName": service["metadata"]["name"],
-                                "port": port["port"],
-                                "targetPort": port["target_port"],
-                                "serviceType": service["spec"]["type"]
-                            })
+                            if service["spec"]["ports"] is not None:
+                                for port in service["spec"]["ports"]:                        
+                                    exposures.append({
+                                            "serviceName": service["metadata"]["name"],
+                                            "port": port["port"],
+                                            "targetPort": port["target_port"],
+                                            "serviceType": service["spec"]["type"]
+                                        })
+
 
     return jsonify(
         status = "SUCCESS",
@@ -247,3 +261,65 @@ def createPod():
                 payLoad = json.loads(e.body)
             )
 
+
+# Usage: Patches a pod present in the specified namespace.
+# Method: GET
+# Params: namespace, podName
+@app.route('/pod', methods = ['PATCH'])
+def patchPod():
+    try: 
+        # Retrieve request's JSON object
+        requestJSON = request.get_json()
+
+        result = v1.patch_namespaced_pod(
+                namespace = requestJSON["namespace"],
+                name = requestJSON["podName"],
+                body = requestJSON["body"]
+            )
+
+        return jsonify(
+            status = "SUCCESS",
+            statusDetails = "Pod patched successfully.",
+            payLoad = result.to_dict()
+        )
+        
+    except Exception as e:
+        return jsonify(
+                status = "FAILURE",
+                statusDetails = "Pod patch failed.",
+                payLoad = json.loads(e.body) if e.body else str(e)
+            )
+
+
+# Usage: Replaces a pod present in the specified namespace.
+# Method: PUT
+# Params: namespace, podName
+@app.route('/pod', methods = ['PUT'])
+def replacePod():
+
+    # pod updates may not change fields other than `spec.containers[*].image`, `spec.initContainers[*].image`, `spec.activeDeadlineSeconds` or `spec.tolerations` (only additions to existing tolerations)
+
+    try: 
+        # Retrieve request's JSON object
+        requestJSON = request.get_json()
+
+        fakeResponse = FakeKubeResponse(requestJSON["body"])
+        deserializerClient = client.api_client.ApiClient()
+        newBody = deserializerClient.deserialize(response = fakeResponse, response_type = "V1Pod")
+        print(newBody)
+   
+        result = v1.replace_namespaced_pod(namespace = requestJSON["namespace"], name = requestJSON["podName"], body = newBody).to_dict()
+
+        return jsonify(
+            status = "SUCCESS",
+            statusDetails = "Pod replaced successfully.",
+            payLoad = result
+        )
+        
+    except Exception as e:
+        print(e)
+        return jsonify(
+                status = "FAILURE",
+                statusDetails = "Pod replacement failed.",
+                payLoad = json.loads(e.body) if e.body else str(e)
+            )
