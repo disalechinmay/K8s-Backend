@@ -10,7 +10,7 @@ app = Flask(__name__)
 def after_request(response):
   response.headers.add('Access-Control-Allow-Origin', '*')
   response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-  response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
+  response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS,PUT')
   return response
 
 # Use config.load_incluster_config() for incluster deployment.
@@ -48,7 +48,7 @@ def pageNotFound(error):
 # Handles internal server errors
 @app.errorhandler(Exception)
 def internalServerError(error):
-	# print(error.body)
+	print(error)
 	return jsonify(
 			status = "FAILURE", 
 			statusDetails = "An internal server error has occurred.",
