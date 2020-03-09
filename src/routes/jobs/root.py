@@ -1,6 +1,7 @@
 from __main__ import app, batchv1
 from flask import jsonify, request
 import json
+from pprint import pprint 
 
 # Usage: Returns a list of all jobs present in the specified namespace.
 # Method: GET
@@ -14,25 +15,29 @@ def getjobs():
         namespace = "default"
 
     alljobs = batchv1.list_namespaced_job(namespace).to_dict()
-    
+    pprint(alljobs)
     returnList = []
 
-    for jobs in alljobs["items"]:
+    for job in alljobs["items"]:
         tempDict = {}
-        tempDict["jobName"] = jobs["metadata"]["name"]
-        tempDict["jobLabels"] = jobs["metadata"]["labels"]
-        tempDict["jobAnnotations"] = jobs["metadata"]["annotations"]
-        tempDict["jobTemplate"] = []
-        tempDict["jobTargetCompletions"] = jobs["spec"]["completions"]
-        tempDict["jobCurrentCompletions"] = jobs["status"]["succeeded"]
+        tempDict["jobName"] = job["metadata"]["name"]
+        tempDict["jobLabels"] = job["metadata"]["labels"]
+        tempDict["jobAnnotations"] = job["metadata"]["annotations"]
+        tempDict["jobContainers"] = []
+        tempDict["jobCurrentCompletions"] = job["status"]["succeeded"]
 
-        for container in jobs["spec"]["template"]["spec"]["containers"]:
-            tempDict["jobTemplate"].append(container["image"])      
-
+        for container in job["spec"]["template"]["spec"]["containers"]:
+            tempDict["jobContainers"].append(container["image"])      
+        print("dsfsfd")
+        tempDict["jobTargetCompletions"] = job["spec"]["completions"]
+        tempDict["jobStartTime"] = job["status"]["start_time"] 
+        tempDict["jobCompletionTime"] = job["status"]["completion_time"] 
         returnList.append(tempDict)
 
+    print("fasfas")
     return jsonify(
         status = "SUCCESS",
         statusDetails = "Returning a list of jobs of '" + namespace + "' namespace.",
         payLoad = returnList
     )
+
