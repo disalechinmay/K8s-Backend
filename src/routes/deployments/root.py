@@ -85,6 +85,12 @@ def getDeployment():
 
     deployment = appsv1.read_namespaced_deployment(namespace = namespace, name = deploymentName).to_dict()
 
+    for container in deployment["spec"]["template"]["spec"]["containers"]:
+        for port in container["ports"]:
+            port["containerPort"] = port["container_port"]
+            del port["container_port"]
+            print(port)
+
     return jsonify(
         status = "SUCCESS",
         statusDetails = "Returning deployment '" + deploymentName + "' of '" + namespace + "' namespace.",

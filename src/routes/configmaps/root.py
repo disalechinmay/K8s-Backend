@@ -160,3 +160,39 @@ def patchConfigMap():
             statusDetails="ConfigMap patch failed.",
             payLoad=str(e)
         )
+
+
+@app.route('/configmap', methods = ['PUT'])
+def replaceConfigMap():
+    try: 
+        # Retrieve request's JSON object
+        requestJSON = request.get_json()
+
+        meta = client.V1ObjectMeta(name = requestJSON["configMapName"],
+                labels = (requestJSON["body"]["metadata"]["labels"] if ("labels" in requestJSON["body"]["metadata"]) else None),
+                annotations = (requestJSON["body"]["metadata"]["annotations"] if ("annotations" in requestJSON["body"]["metadata"]) else None)
+            )
+        
+        body = client.V1ConfigMap(
+            metadata = meta,
+            data = requestJSON["body"]["data"],
+            kind = requestJSON["body"]["kind"],
+            api_version = requestJSON["body"]["api_version"]
+        )
+
+        result = v1.replace_namespaced_config_map(namespace = requestJSON["namespace"], name = requestJSON["configMapName"], body = body).to_dict()
+
+        return jsonify(
+            status = "SUCCESS",
+            statusDetails = "ConfigMap replaced successfully.",
+            payLoad = result
+        )
+        
+    except Exception as e:
+        print(e)
+        return jsonify(
+                status = "FAILURE",
+                statusDetails = "configMap  replacement failed.",
+                payLoad = json.loads(e.body) if e.body else str(e)
+            )
+
