@@ -21,3 +21,25 @@ def getNamespaces():
         statusDetails = "Returning a list of namespaces present in the cluster.",
         payLoad = namespaceList
     )
+
+@app.route('/namespace', methods = ['POST'])
+def createNamespace():
+    requestJSON = request.get_json()
+
+    data = client.V1ObjectMeta(name =  requestJSON["namespace"] )
+
+    body = client.V1Namespace(metadata = data)
+
+    allNamespaces = v1.create_namespace(body = body).to_dict()
+
+    # Putting all namespaces in a single list
+    namespaceList = []
+    for namespace in allNamespaces["items"]:
+        namespaceList.append(namespace["metadata"]["name"])
+
+    return jsonify(
+        status = "SUCCESS",
+        statusDetails = "Returning a list of namespaces present in the cluster.",
+        payLoad = namespaceList
+    )
+
