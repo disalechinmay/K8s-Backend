@@ -1,5 +1,5 @@
-from __main__ import app, v1
-from flask import jsonify
+from __main__ import app, v1, client
+from flask import jsonify, request
 import json
 
 
@@ -24,22 +24,50 @@ def getNamespaces():
 
 @app.route('/namespace', methods = ['POST'])
 def createNamespace():
-    requestJSON = request.get_json()
+    try:
+        requestJSON = request.get_json()
+        print(requestJSON)
 
-    data = client.V1ObjectMeta(name =  requestJSON["namespace"] )
+        data = client.V1ObjectMeta(name =  requestJSON["namespace"] )
 
-    body = client.V1Namespace(metadata = data)
+        body = client.V1Namespace(metadata = data)
 
-    allNamespaces = v1.create_namespace(body = body).to_dict()
+        returnValue = v1.create_namespace(body = body).to_dict()
 
-    # Putting all namespaces in a single list
-    namespaceList = []
-    for namespace in allNamespaces["items"]:
-        namespaceList.append(namespace["metadata"]["name"])
-
-    return jsonify(
+        return jsonify(
         status = "SUCCESS",
-        statusDetails = "Returning a list of namespaces present in the cluster.",
-        payLoad = namespaceList
-    )
+        statusDetails = "Created namespace successfully.",
+        payLoad = returnValue
+        )
+
+    except Exception as e:
+        print(e)
+        return jsonify(
+                status = "FAILURE",
+                statusDetails = "Namespace creation failed.",
+                payLoad = json.loads(e.body)
+            )
+
+
+@app.route('/namespace', methods = ['DELETE'])
+def deleteNamespace():
+    try:
+        requestJSON = request.get_json()
+
+        returnValue = v1.delete_namespace(name = requestJSON["namespace"]).to_dict()
+
+        return jsonify(
+        status = "SUCCESS",
+        statusDetails = "Namespace deleted successfully.",
+        payLoad = returnValue
+        )
+
+    except Exception as e:
+        return jsonify(
+                status = "FAILURE",
+                statusDetails = "Namespace deletion failed.",
+                payLoad = json.loads(e.body)
+            )
+
+
 
