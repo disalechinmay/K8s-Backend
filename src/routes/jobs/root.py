@@ -15,7 +15,6 @@ def getjobs():
         namespace = "default"
 
     alljobs = batchv1.list_namespaced_job(namespace).to_dict()
-    pprint(alljobs)
     returnList = []
 
     for job in alljobs["items"]:
@@ -28,16 +27,53 @@ def getjobs():
 
         for container in job["spec"]["template"]["spec"]["containers"]:
             tempDict["jobContainers"].append(container["image"])      
-        print("dsfsfd")
+        
         tempDict["jobTargetCompletions"] = job["spec"]["completions"]
         tempDict["jobStartTime"] = job["status"]["start_time"] 
         tempDict["jobCompletionTime"] = job["status"]["completion_time"] 
         returnList.append(tempDict)
 
-    print("fasfas")
     return jsonify(
         status = "SUCCESS",
         statusDetails = "Returning a list of jobs of '" + namespace + "' namespace.",
         payLoad = returnList
     )
 
+@app.route('/job', methods = ['DELETE'])
+def deleteJob():
+
+    # Retrieve request's JSON object
+    requestJSON = request.get_json()
+
+    if (requestJSON["namespace"] is None) and (requestJSON["jobName"] is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Namespace & Job name is not specified as body params.",
+            payLoad = None
+        )
+
+    if(requestJSON["namespace"] is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Namespace is not specified as body params.",
+            payLoad = None
+        )
+
+    if(requestJSON["jobName"] is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Job name is not specified as body params.",
+            payLoad = None
+        )
+
+
+    returnValue = batchv1.delete_namespaced_job(
+            requestJSON["jobName"], requestJSON["namespace"]
+        ).to_dict()
+
+
+    return jsonify(
+        status = "SUCCESS",
+        statusDetails = "Attempted to delete job '" + requestJSON["jobName"] + "' of '" + requestJSON["namespace"] + "' namespace.",
+        payLoad = None
+    )

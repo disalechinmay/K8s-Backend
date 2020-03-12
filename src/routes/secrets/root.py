@@ -117,7 +117,7 @@ def patchsecret():
 # Usage: Replaces a secret secret present in the specified namespace.
 # Method: PUT
 # Params: namespace, secretName
-@app.route('/secret', methods = ['PUT'])
+@app.route('/secret', methods = ['POST'])
 def replaceSecret():
     try: 
         # Retrieve request's JSON object
