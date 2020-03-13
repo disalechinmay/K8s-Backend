@@ -20,10 +20,13 @@ config.load_kube_config()
 v1 = client.CoreV1Api()
 appsv1 = client.AppsV1Api()
 batchv1 = client.BatchV1Api()
+batchv1beta1 = client.BatchV1beta1Api()
 
 # Importing all endpoints from /src/routes
 from src.routes.secrets import *
 from src.routes.configmaps import *
+from src.routes.secrets import *
+from src.routes.cronjobs import *
 from src.routes.jobs import *
 from src.routes.services import *
 from src.routes.deployments import *
