@@ -77,3 +77,68 @@ def deleteJob():
         statusDetails = "Attempted to delete job '" + requestJSON["jobName"] + "' of '" + requestJSON["namespace"] + "' namespace.",
         payLoad = None
     )
+
+
+@app.route('/job', methods = ['PATCH'])
+def patchJob():
+    try: 
+        # Retrieve request's JSON object
+        requestJSON = request.get_json()
+
+        result = batchv1.patch_namespaced_job(
+                namespace = requestJSON["namespace"],
+                name = requestJSON["jobName"], body = requestJSON["body"]
+            )
+
+        return jsonify(
+            status = "SUCCESS",
+            statusDetails = "Cron Job patched successfully.",
+            payLoad = result.to_dict()
+        )
+        
+    except Exception as e:
+        return jsonify(
+                status = "FAILURE",
+                statusDetails = "Pod patch failed.",
+                payLoad = json.loads(e.body) if e.body else str(e)
+            )
+
+
+@app.route('/job', methods = ['GET'])
+def getJob():
+
+    # Get query param "namespace", if not present set to "default"
+    namespace = request.args.get("namespace")    
+    jobName = request.args.get("jobName")
+
+    if (namespace is None) and (jobName is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Namespace & pod name is not specified as query params.",
+            payLoad = None
+        )
+
+    if(namespace is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Namespace is not specified as query params.",
+            payLoad = None
+        )
+
+    if(jobName is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Cron Job name is not specified as query params.",
+            payLoad = None
+        )
+
+
+    job = batchv1.read_namespaced_job(namespace = namespace, name = jobName).to_dict()
+
+  
+    return jsonify(
+        status = "SUCCESS",
+        statusDetails = "Returning cron job '" + jobName + "' of '" + namespace + "' namespace.",
+        payLoad = job
+    )
+
