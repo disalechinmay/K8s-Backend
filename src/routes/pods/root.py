@@ -74,10 +74,12 @@ def getPod():
 
     pod = v1.read_namespaced_pod(namespace = namespace, name = podName).to_dict()
 
-    for container in pod["spec"]["containers"]:
-        for port in container["ports"]:
-            port["containerPort"] = port["container_port"]
-            del port["container_port"]
+    if pod["spec"]["containers"] is not None:
+        for container in pod["spec"]["containers"]:
+            if container["ports"] is not None:
+                for port in container["ports"]:
+                    port["containerPort"] = port["container_port"]
+                    del port["container_port"]
 
     return jsonify(
         status = "SUCCESS",
