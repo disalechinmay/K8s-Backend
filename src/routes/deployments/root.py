@@ -1,4 +1,4 @@
-from __main__ import app, appsv1
+from __main__ import app, appsv1, client
 from flask import jsonify, request
 import json
 
@@ -124,3 +124,127 @@ def patchDeployment():
                 statusDetails = "Deployment patch failed.",
                 payLoad = json.loads(e.body)
             )
+
+
+# Usage: Creates a deployment in the specified namespace.
+# Method: POST
+# Body Params: namespace, deploymentName, deploymentImage, deploymentReplicas, deploymentVars
+@app.route('/deployment', methods = ['POST'])
+def createDeployment():
+    try:
+        # Retrieve request's JSON object
+        requestJSON = request.get_json()
+
+        meta = client.V1ObjectMeta(name = requestJSON["deploymentName"])
+
+        envList = []
+        for variableObj in requestJSON["deploymentVars"] :
+
+            keySel = client.V1ConfigMapKeySelector(
+                    name = variableObj["configMapName"],
+                    key = variableObj["variable"]
+                )
+
+            envVarSource = client.V1EnvVarSource(
+                    config_map_key_ref = keySel
+                )
+
+
+            envVar = client.V1EnvVar(
+                    name = variableObj["variable"],
+                    value_from = envVarSource
+                )
+
+            envList.append(envVar)
+
+        containerList = []
+        container = client.V1Container(
+                name = requestJSON["deploymentName"],
+                image = requestJSON["deploymentImage"],
+                env = envList
+            )
+        containerList.append(container)
+
+        podSpec = client.V1PodSpec(
+                containers = containerList
+            )
+
+        podTemplateSpec = client.V1PodTemplateSpec(
+                spec = podSpec,
+                metadata = client.V1ObjectMeta(labels = {"app": requestJSON["deploymentName"]})
+            )
+
+        selector = client.V1LabelSelector(match_labels = {"app": requestJSON["deploymentName"]})
+
+        spec = client.V1DeploymentSpec(
+                replicas = int(requestJSON["deploymentReplicas"]),
+                template = podTemplateSpec,                
+                selector = selector
+            )
+
+        body = client.V1Deployment(
+                metadata = meta,
+                spec = spec
+            )
+
+        response = appsv1.create_namespaced_deployment(namespace = requestJSON["namespace"], body = body).to_dict()
+
+        return jsonify(
+                status = "SUCCESS",
+                statusDetails = "Deployment created successfully.",
+                payLoad = None
+            )
+
+    except Exception as e:
+        print(str(e))
+        return jsonify(
+                status = "FAILURE",
+                statusDetails = "Deployment creation failed.",
+                payLoad = json.loads(e.body)
+            )
+
+
+
+# Usage: Deletes a deployment by deploymentName & namespace specified in request.
+# Method: DELETE
+# Request Body: JSON {
+#                        deploymentName: "",
+#                        namespace: ""
+#                    }
+@app.route('/deployment', methods = ['DELETE'])
+def deleteDeployment():
+
+    # Retrieve request's JSON object
+    requestJSON = request.get_json()
+
+    if (requestJSON["namespace"] is None) and (requestJSON["deploymentName"] is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Namespace & deployment name is not specified as body params.",
+            payLoad = None
+        )
+
+    if(requestJSON["namespace"] is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Namespace is not specified as body params.",
+            payLoad = None
+        )
+
+    if(requestJSON["deploymentName"] is None):
+        return jsonify(
+            status = "FAILURE",
+            statusDetails = "Deployment name is not specified as body params.",
+            payLoad = None
+        )
+
+
+    returnValue = appsv1.delete_namespaced_deployment(
+            requestJSON["deploymentName"], requestJSON["namespace"]
+        ).to_dict()
+
+    return jsonify(
+        status = "SUCCESS",
+        statusDetails = "Attempted to delete deployment '" + requestJSON["deploymentName"] + "' of '" + requestJSON["namespace"] + "' namespace.",
+        payLoad = None
+    )
