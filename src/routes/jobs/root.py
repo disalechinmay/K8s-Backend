@@ -1,4 +1,4 @@
-from __main__ import app, batchv1
+from __main__ import app, batchv1, client
 from flask import jsonify, request
 import json
 from pprint import pprint 
@@ -142,3 +142,67 @@ def getJob():
         payLoad = job
     )
 
+
+@app.route('/job', methods = ['POST'])
+def createJob():
+    try:
+        # Retrieve request's JSON object
+        requestJSON = request.get_json()
+
+        meta = client.V1ObjectMeta(name = requestJSON["jobName"])
+
+
+       
+
+        containerList = []
+        container = client.V1Container(
+                name = requestJSON["jobName"],
+                image = requestJSON["jobImage"],
+            )
+
+        containerList.append(container)
+
+        podSpec = client.V1PodSpec(
+                containers = containerList,
+                restart_policy = "Never"
+            )
+
+        podTemplateSpec = client.V1PodTemplateSpec(
+                spec = podSpec,
+                metadata = client.V1ObjectMeta(labels = {"app": requestJSON["jobName"]})
+            )
+
+        # selector = client.V1LabelSelector(match_labels = {"app": requestJSON["jobName"]})
+
+        spec = client.V1JobSpec(
+                completions = int(requestJSON["jobCompletions"]),
+                template = podTemplateSpec                
+                # selector = selector
+            )
+
+        body = client.V1Job(
+                metadata = meta,
+                spec = spec
+                )
+
+        print(body)
+        print("")
+
+
+        response = batchv1.create_namespaced_job(namespace = requestJSON["namespace"], body = body).to_dict()
+
+
+        print(response)
+        return jsonify(
+                status = "SUCCESS",
+                statusDetails = "Job created successfully.",
+                payLoad = None
+            )
+
+    except Exception as e:
+        print(str(e))
+        return jsonify(
+                status = "FAILURE",
+                statusDetails = "Job creation failed.",
+                payLoad = json.loads(e.body)
+            )

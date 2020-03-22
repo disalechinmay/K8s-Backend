@@ -174,7 +174,7 @@ def createDeployment():
                 metadata = client.V1ObjectMeta(labels = {"app": requestJSON["deploymentName"]})
             )
 
-        selector = client.V1LabelSelector(match_labels = {"app": requestJSON["deploymentName"]})
+        # selector = client.V1LabelSelector(match_labels = {"app": requestJSON["deploymentName"]})
 
         spec = client.V1DeploymentSpec(
                 replicas = int(requestJSON["deploymentReplicas"]),
