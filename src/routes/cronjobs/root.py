@@ -1,4 +1,4 @@
-from __main__ import app, batchv1beta1
+from __main__ import app, batchv1beta1, client
 from flask import jsonify, request
 import json
 from pprint import pprint 
@@ -37,7 +37,6 @@ def getCronJobs():
         payLoad = returnList
     )
 
-
 @app.route('/cronjob', methods = ['GET'])
 def getCronJob():
 
@@ -75,10 +74,6 @@ def getCronJob():
         statusDetails = "Returning cron job '" + cronJobName + "' of '" + namespace + "' namespace.",
         payLoad = cronJob
     )
-
-
-
-
 
 @app.route('/cronjob', methods = ['DELETE'])
 def deleteCronJob():
@@ -119,7 +114,6 @@ def deleteCronJob():
         payLoad = None
     )
 
-
 @app.route('/cronjob', methods = ['PATCH'])
 def patchCronJob():
     try: 
@@ -140,7 +134,76 @@ def patchCronJob():
     except Exception as e:
         return jsonify(
                 status = "FAILURE",
-                statusDetails = "Pod patch failed.",
+                statusDetails = "Cron Job patch failed.",
                 payLoad = json.loads(e.body) if e.body else str(e)
+            )
+
+@app.route('/cronjob', methods = ['POST'])
+def createCronJob():
+    try:
+        # Retrieve request's JSON object
+        requestJSON = request.get_json()
+
+        print(requestJSON)
+
+        meta = client.V1ObjectMeta(name = requestJSON["cronJobName"])
+
+        containerList = []
+        container = client.V1Container(
+                name = requestJSON["cronJobName"],
+                image = requestJSON["cronJobImage"],
+            )
+
+        containerList.append(container)
+
+        podSpec = client.V1PodSpec(
+                containers = containerList,
+                restart_policy = "Never"
+            )
+
+        jobTemplate = client.V1PodTemplateSpec(
+            spec = podSpec,
+            metadata = client.V1ObjectMeta(labels = {"app": requestJSON["cronJobName"]})
+            )
+
+        # selector = client.V1LabelSelector(match_labels = {"app": requestJSON["cronJobName"]})
+
+
+        jobSpec = client.V1JobSpec(
+            # selector = selector,
+            template = jobTemplate
+            )
+
+        podTemplateSpec = client.V1beta1JobTemplateSpec(
+                spec = jobSpec,
+                metadata = client.V1ObjectMeta(labels = {"app": requestJSON["cronJobName"]})
+            )
+
+
+        spec = client.V1beta1CronJobSpec(
+                job_template = podTemplateSpec,
+                schedule = requestJSON["cronJobSchedule"])
+
+        body = client.V1beta1CronJob(
+                metadata = meta,
+                spec = spec
+                )
+
+        # print(body)
+        response = batchv1beta1.create_namespaced_cron_job(namespace = requestJSON["namespace"], body = body).to_dict()
+
+        # print(response)
+        return jsonify(
+                status = "SUCCESS",
+                statusDetails = "Cron Job created successfully.",
+                payLoad = None
+            )
+
+    except Exception as e:
+        # print(str(e))
+        return jsonify(
+                status = "FAILURE",
+                statusDetails = "Cron Job creation failed.",
+                payLoad = json.loads(e.body)
             )
 
