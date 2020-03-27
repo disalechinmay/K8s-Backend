@@ -140,20 +140,34 @@ def createDeployment():
         envList = []
         for variableObj in requestJSON["deploymentVars"] :
 
-            keySel = client.V1ConfigMapKeySelector(
+            keySel = ""
+            secretKeySel = ""
+
+            if "configMapName" in variableObj:
+                keySel = client.V1ConfigMapKeySelector(
                     name = variableObj["configMapName"],
                     key = variableObj["variable"]
                 )
-
-            envVarSource = client.V1EnvVarSource(
+                envVarSource = client.V1EnvVarSource(
                     config_map_key_ref = keySel
+
                 )
+
+
+            if "secretName" in variableObj:
+                secretKeySel = client.V1SecretKeySelector(
+                    name = variableObj["secretName"],
+                    key = variableObj["variable"])
+                envVarSource = client.V1EnvVarSource(
+                    secret_key_ref = secretKeySel
+                )
+
 
 
             envVar = client.V1EnvVar(
-                    name = variableObj["variable"],
-                    value_from = envVarSource
-                )
+                name = variableObj["variable"],
+                  value_from = envVarSource
+            )
 
             envList.append(envVar)
 
@@ -174,7 +188,7 @@ def createDeployment():
                 metadata = client.V1ObjectMeta(labels = {"app": requestJSON["deploymentName"]})
             )
 
-        # selector = client.V1LabelSelector(match_labels = {"app": requestJSON["deploymentName"]})
+        selector = client.V1LabelSelector(match_labels = {"app": requestJSON["deploymentName"]})
 
         spec = client.V1DeploymentSpec(
                 replicas = int(requestJSON["deploymentReplicas"]),
