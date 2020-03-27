@@ -212,17 +212,32 @@ def createPod():
         meta = client.V1ObjectMeta(name = requestJSON["podName"])
 
         envList = []
+
         for variableObj in requestJSON["podVars"] :
 
-            keySel = client.V1ConfigMapKeySelector(
-                    name = variableObj["configMapName"],
-                    key = variableObj["variable"]
-                )
+            keySel = ""
+            secretKeySel = ""
 
-            envVarSource = client.V1EnvVarSource(
+            if "configMapName" in variableObj:
+                    keySel = client.V1ConfigMapKeySelector(
+                        name = variableObj["configMapName"],
+                        key = variableObj["variable"]
+                    )
+                    envVarSource = client.V1EnvVarSource(
                     config_map_key_ref = keySel
+                    
                 )
 
+
+            if "secretName" in variableObj:
+                secretKeySel = client.V1SecretKeySelector(
+                        name = variableObj["secretName"],
+                        key = variableObj["variable"])
+                envVarSource = client.V1EnvVarSource(
+                        secret_key_ref = secretKeySel
+                )
+                
+           
 
             envVar = client.V1EnvVar(
                     name = variableObj["variable"],
@@ -231,6 +246,7 @@ def createPod():
 
             envList.append(envVar)
 
+     
         containerList = []
         container = client.V1Container(
                 name = requestJSON["podName"],
